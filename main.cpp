@@ -10,7 +10,7 @@
 using namespace cimg_library;
 using namespace std;
 
-vector<vector<int>> tests = vector<vector<int>>(7);
+vector<vector<pair<string,vector<double>>>> tests = vector<vector<pair<string,vector<double>>>>(7,vector<pair<string,vector<double>>>());
 vector<string> folders = {"anger","contempt","disgust","fear","happy","sadness","surprise"};
 string basePath = "/Users/panflete/Documents/UTEC/Ciclo 6/EDA/kdtree_recognition/CK+48/";
 
@@ -50,30 +50,25 @@ vector<pair<string,vector<double>>> get_vectors() {
 
 		shuffle(random_files.begin(), random_files.end(), default_random_engine(seed));
 
-		//Guardamos los indices de las imagenes que usamos para los tests
-		for(int j = numFiles[i]*0.7; j < numFiles[i]; j++) {
-			tests[i].push_back(random_files[j]);
-		}
-
 		//Cortamos las imagenes de test
 		random_files.resize((int)(numFiles[i]*0.7));
 
 		sort(random_files.begin(), random_files.end());
 
 		for(const auto & entry : filesystem::directory_iterator(basePath+folders[i])) {
-			
-			//Si es una imagen para tests no la agregamos
-			if(find(random_files.begin(),random_files.end(),cur) == random_files.end()) {
-				cur++;
-				continue;
-			}
 
 			string entry_path = basePath+folders[i]+"/"+entry.path().filename().string();
 			CImg<double> A(entry_path.c_str());
 			A.resize(48,48);
 			vector<double> vA = vectorize(A,3);
 
-			points.push_back({folders[i],vA});
+			//Si es una imagen para tests la guardamos en el vector tests
+			if(find(random_files.begin(),random_files.end(),cur) == random_files.end()) {
+				tests[i].push_back({folders[i],vA});
+			}
+			else {
+				points.push_back({folders[i],vA});
+			}
 
 			cur++;
 		
